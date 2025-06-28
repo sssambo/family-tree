@@ -58,6 +58,27 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const googleLogin = async (credential) => {
+    try {
+      const response = await authAPI.googleLogin(credential);
+      const { user, tokens } = response;
+
+      setUser(user);
+      setToken(tokens.accessToken);
+
+      localStorage.setItem("accessToken", tokens.accessToken);
+      localStorage.setItem("refreshToken", tokens.refreshToken);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      toast.success(`Welcome, ${user.username || user.firstName}!`);
+      return { success: true };
+    } catch (error) {
+      const message = error.response?.data?.error || "Google login failed";
+      toast.error(message);
+      return { success: false, error: message };
+    }
+  };
+
   const signup = async (userData) => {
     try {
       const response = await authAPI.signup(userData);
@@ -98,6 +119,7 @@ export const AuthProvider = ({ children }) => {
     token,
     loading,
     login,
+    googleLogin,
     signup,
     logout,
     isAuthenticated: !!token,
